@@ -3,5 +3,5 @@
 window.APP_CONFIG = {
   appName: 'ARTIME',
   tagline: 'Stock Management',
-  scriptUrl: 'https://script.google.com/macros/s/AKfycbzVM0xUivZC_0G631T0NQsqzwi3x3h9oZ-W007x1p0buT1SMgoIvWT3nEnMxrjnFAJszQ/exec'
+  scriptUrl: 'https://script.google.com/macros/s/AKfycbxZSymwaHSi9IKUIz1Y6kqI-cWO3W5hmIMPQuZMzPbwAyO5QMc24kcteL2tgF085QrB/exec'
 };
