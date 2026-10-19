@@ -1,8 +1,9 @@
 // Service worker: keeps the app opening instantly and working offline.
 // When you change any app file, bump CACHE (v1 -> v2) so phones pick up the update.
-const CACHE = 'artime-stock-v7';
+const CACHE = 'artime-stock-v32';
 const SHELL = [
-  './', './index.html', './styles.css', './app.js', './config.js',
+  './', './index.html', './styles.css', './config.js', './money.js',
+  './js/core.js', './js/lang-words.js', './js/lang-engine.js', './js/icons.js', './js/state.js', './js/router.js', './js/shell.js', './js/avatars.js', './js/money-link.js', './js/home.js', './js/charts.js', './js/items.js', './js/reports.js', './js/dial-report.js', './js/reorder-list.js', './js/settings.js', './js/forms.js', './js/sheet-toast.js', './js/events.js', './js/dial.js', './js/reorder-popups.js', './js/dropdown.js', './js/back-layers.js', './js/boot.js',
   './manifest.json', './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png',
   './icons/apple-touch-icon.png', './icons/favicon.png'
 ];
@@ -20,7 +21,7 @@ self.addEventListener('activate', (e) => {
   );
 });
 
-// App files: show the cached copy right away, refresh it in the background.
+// App files: ask the server first (always the newest copy), use the saved copy only when offline.
 // Google Sheet calls (other origin) are never touched here.
 self.addEventListener('fetch', (e) => {
   const req = e.request;
@@ -29,14 +30,11 @@ self.addEventListener('fetch', (e) => {
   if (url.origin !== location.origin) return;
 
   e.respondWith(
-    caches.open(CACHE).then(async (cache) => {
-      const cached = await cache.match(req, { ignoreSearch: true });
-      const network = fetch(req)
-        .then((res) => { if (res && res.ok) cache.put(req, res.clone()); return res; })
-        .catch(() => null);
-      if (cached) { e.waitUntil(network); return cached; }
-      const res = await network;
-      return res || (req.mode === 'navigate' ? cache.match('./index.html') : Response.error());
-    })
+    fetch(req, { cache: 'no-cache' })
+      .then((res) => { if (res && res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); } return res; })
+      .catch(async () => {
+        const cache = await caches.open(CACHE);
+        return (await cache.match(req, { ignoreSearch: true })) || (req.mode === 'navigate' ? cache.match('./index.html') : Response.error());
+      })
   );
 });
